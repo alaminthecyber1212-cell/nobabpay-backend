@@ -1,3 +1,4 @@
+
 const express = require("express");
 const admin = require("firebase-admin");
 
@@ -18,11 +19,11 @@ if (!admin.apps.length) {
   }
 }
 
-app.get("/", (req, res) => {
+app.get(["/", "/api"], (req, res) => {
   res.status(200).json({ ok: true, service: "nobabpay-backend" });
 });
 
-app.post("/create-payment", async (req, res) => {
+app.post(["/create-payment", "/api/create-payment"], async (req, res) => {
   try {
     const { uid, amount, full_name, email, redirect_url, cancel_url } = req.body || {};
     const brandKey = process.env.NOBABPAY_BRAND_KEY;
@@ -35,7 +36,7 @@ app.post("/create-payment", async (req, res) => {
     }
 
     const baseUrl = process.env.NOBABPAY_BASE_URL || "https://nobabpay.com";
-    const webhookUrl = `${req.protocol}://${req.get("host")}/webhook`;
+    const webhookUrl = `${req.protocol}://${req.get("host")}/api/webhook`;
 
     const params = new URLSearchParams({
       brand_key: brandKey,
@@ -61,7 +62,7 @@ app.post("/create-payment", async (req, res) => {
   }
 });
 
-app.all("/webhook", async (req, res) => {
+app.all(["/webhook", "/api/webhook"], async (req, res) => {
   try {
     const payload = { ...(req.query || {}), ...(req.body || {}) };
     const invoiceId = payload.invoice_id || payload.transaction_id || payload.trx_id;
